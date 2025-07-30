@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 
 const ChannelSchema = new mongoose.Schema({
-  channeId: {
-    type: mongoose.Schema.Types.ObjectId,
-  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",

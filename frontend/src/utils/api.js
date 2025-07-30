@@ -20,11 +20,11 @@ const authService = {
 const channelService = {
     create: (channelData) => api.post('/channels', channelData),
     getMyChannel: () => api.get('/channels/me'),
-    getByHandle: (handle) => api.get(`/channels/${handle}`),
+    getByHandle: (id) => api.get(`/channels/${id}`),
 };
 
 // Video service
-const videoService = {
+export const videoService = {
     create: (videoData) => api.post('/videos', videoData),
     getAll: (params) => api.get('/videos', { params }),
     // getById: (id) => api.get(`/videos/${id}`),

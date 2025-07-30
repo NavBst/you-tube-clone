@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import { MdCloudUpload } from "react-icons/md";
 import { channels } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { updatechannel } from "../../store/authSlice";
 
 const ChannelForm = ({ onSuccess }) => {
+  const { user } = useSelector((state) => state.auth);
   const [channelData, setChannelData] = useState({
     name: "",
     description: "",
@@ -35,7 +38,6 @@ const ChannelForm = ({ onSuccess }) => {
       if (res.status === 201) {
         onSuccess && onSuccess(res.data);
       }
-      
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create channel");
     } finally {
@@ -43,14 +45,17 @@ const ChannelForm = ({ onSuccess }) => {
     }
   };
 
+  const dispatch = useDispatch();
   useEffect(() => {
     const getChan = async (params) => {
       const channel = await channels.getMyChannel();
-      if(channel){
-        navigate('/channel')
+      if (channel) {
+        dispatch(updatechannel(channel));
+        navigate("/channel");
       }
+      navigate("/channel");
     };
-  },[]);
+  }, []);
 
   return (
     <div className="max-w-2xl mx-auto p-6">

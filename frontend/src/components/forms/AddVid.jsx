@@ -1,24 +1,31 @@
 // src/components/video/AddVideoForm.jsx
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { videos } from "../../utils/api"; // Import your video service
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { channels, videos } from "../../utils/api"; // Import your video service
+import { useNavigate } from "react-router-dom";
 
 const AddVid = ({ onSuccess }) => {
   const { token, user } = useSelector((state) => state.auth);
 
+  const [channelData, setChannelData] = useState(null);
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     title: "",
     description: "",
-    thumbnail: "",
+    thumbnailUrl: "",
     videoUrl: "",
     category: "",
+    channelId: "",
+    channelName: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: e.target.value.toString() });
   };
 
   const handleSubmit = async (e) => {
@@ -33,10 +40,13 @@ const AddVid = ({ onSuccess }) => {
       setForm({
         title: "",
         description: "",
-        thumbnail: "",
+        thumbnailUrl: "",
         videoUrl: "",
         category: "",
+        channelId: channelData._id.toString(),
+        channelName: channelData.name,
       });
+      navigate("/channel");
       if (onSuccess) onSuccess(resp.data);
     } catch (err) {
       setError(
@@ -48,6 +58,23 @@ const AddVid = ({ onSuccess }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    async function getdetails() {
+      try {
+        const res = await channels.getMyChannel();
+        const obj = { ...form };
+        obj.channelId = res?.data?.channel?._id.toString();
+        obj.channelName = res?.data?.channel?.name;
+        console.log(obj);
+        setForm(obj);
+        setChannelData(res.data.channel);
+      } catch (er) {
+        console.log(er);
+      }
+    }
+    getdetails();
+  }, [user]);
 
   if (!user || !token) {
     return <div className="p-4">Please login to add a video!</div>;
@@ -80,17 +107,17 @@ const AddVid = ({ onSuccess }) => {
         required
       />
       <input
-        name="thumbnail"
-        type="url"
+        name="thumbnailUrl"
+        type="text"
         placeholder="Thumbnail Image URL"
-        value={form.thumbnail}
+        value={form.thumbnailUrl}
         onChange={handleChange}
         className="w-full p-3 border rounded"
         required
       />
       <input
         name="videoUrl"
-        type="url"
+        type="text"
         placeholder="Video File URL"
         value={form.videoUrl}
         onChange={handleChange}

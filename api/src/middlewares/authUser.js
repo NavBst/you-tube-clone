@@ -24,7 +24,6 @@ export const userRegAuth = async (req, res, next) => {
 export const userAuthentication = async (req, res, next) => {
   try {
     let { email, password } = req.body;
-    console.log(email);
     const data = await User.findOne({ email });
     if (!data) {
       res.status(404).json({ message: "user not registered!" });
@@ -56,7 +55,6 @@ export const verifyToken = (req, res, next) => {
           return res.status(403).json({ message: "Invalid Token" });
         } else {
           req.user = verifiedToken;
-          console.log(req.user)
           next();
         }
       }

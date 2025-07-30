@@ -53,6 +53,12 @@ const router = createBrowserRouter([
                   <AddVid />
             ),
           },
+          {
+            path: "channels/:id",
+            element: (
+                  <Channel />
+            ),
+          },
         ],
       },
     ],

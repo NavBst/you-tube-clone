@@ -8,7 +8,7 @@ import { channels, videos } from '../../utils/api'
 import ChannelForm from './ChannelForm'
 
 const Channel = () => {
-  const { channelId } = useParams()
+  const { id } = useParams()
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [showNotification, setShowNotification] = useState(false)
   const [loading, setLoading] = useState(true)

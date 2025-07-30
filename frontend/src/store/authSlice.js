@@ -13,6 +13,7 @@ const safeJSONParse = (str) => {
 // Initial state
 const initialState = {
   user: safeJSONParse(localStorage.getItem('user')),
+  channel: null,
   token: localStorage.getItem('token') || null,
   loading: false,
   error: null,
@@ -28,12 +29,14 @@ const slice = createSlice({
       state.user = null;
       state.token = null;
       state.error = null;
+      state.channel = null;
     },
     clearError: (state) => {
       state.error = null;
     },
-    update: (state, action) =>{
-      console.log(action.payload);
+    updatechannel: (state, action) =>{
+      console.log(action.payload)
+      state.channel = action.payload
     },
     load: (state, action)=>{
       state.loading = action.payload.loading;
@@ -73,7 +76,7 @@ const slice = createSlice({
   },
 });
 
-export const { logout, clearError, update, load } = slice.actions;
+export const { logout, clearError, updatechannel, load } = slice.actions;
 
 const authReducer = slice.reducer;
 export default authReducer;

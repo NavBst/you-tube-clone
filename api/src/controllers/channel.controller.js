@@ -6,8 +6,7 @@ import { createError } from "../utils/error.js";
 export const createChannel = async (req, res, next) => {
   try {
     const { name, handle, description, avatar } = req.body;
-    console.log(req.body.verified);
-    const userId = req.body.verified.userId;
+    const {userId} = req.user
 
     // Check if handle already exists (case insensitive)
     const existingHandle = await Channel.findOne({
@@ -76,33 +75,18 @@ export const getChannel = async (req, res, next) => {
 
 export const getChannelByHandle = async (req, res, next) => {
   try {
-    const { handle } = req.params;
-    const formattedHandle = handle.startsWith("@") ? handle : `@${handle}`;
+    const { id } = req.params;
+    console.log(id)
 
-    const channel = await Channel.findOne({ handle: formattedHandle }).populate(
-      "userId",
-      "username avatar"
-    );
+    const channel = await Channel.findOne({ _id: id})
 
     if (!channel) {
       return next(createError(404, "Channel not found"));
     }
 
-    // Get channel's videos
-    const videos = await Video.find({ channel: channel._id })
-      .sort({ createdAt: -1 })
-      .limit(20);
+    // Get channel's video
 
-    // Get total videos count
-    const videosCount = await Video.countDocuments({ channel: channel._id });
-
-    const channelData = {
-      ...channel.toJSON(),
-      videos: videosCount,
-      recentVideos: videos,
-    };
-
-    res.status(200).json(channelData);
+    res.status(200).json(channel);
   } catch (err) {
     next(err);
   }

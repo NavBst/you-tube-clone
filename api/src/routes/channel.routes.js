@@ -11,6 +11,6 @@ router.post("/", verifyToken, createChannel);
 router.get("/me", verifyToken, getChannel);
 
 // Get channel by handle
-router.get("/:handle", getChannelByHandle);
+router.get("/:id", getChannelByHandle);
 
 export default router;

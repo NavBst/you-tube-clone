@@ -1,53 +1,55 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
-import VideoCard from '../video/VideoCard'
-import { RiPlayListAddFill } from 'react-icons/ri'
-import { MdNotifications, MdNotificationsNone } from 'react-icons/md'
-import { useSelector } from 'react-redux'
-import { channels, videos } from '../../utils/api'
-import ChannelForm from './ChannelForm'
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import VideoCard from "../video/VideoCard";
+import { MdNotifications, MdNotificationsNone } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
+import { channels, videoService } from "../../utils/api";
+import { updatechannel } from "../../store/authSlice";
 
-const MyChannel = ({channelList}) => {
-  const id = channelList[0];
-  console.log(channelList)
-  const [showNotification, setShowNotification] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [channelData, setChannelData] = useState(null)
-  const { user } = useSelector(state => state.auth)
-  const navigate = useNavigate()
+const MyChannel = ({ channelList }) => {
+  const dispatch = useDispatch();
+  const [showNotification, setShowNotification] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [channelData, setChannelData] = useState(null);
+  const { user } = useSelector((state) => state.auth);
 
+  const id = channelList._id;
+
+  const navigate = useNavigate();
   useEffect(() => {
-        async function getdetails() {
-            try{
-                const res = await channels.getMyChannel()
-                console.log(res.data)
-                setChannelData(res.data.channel)
-                setLoading(false)
-            }
-            catch(er){
-                console.log(er)
-            }
-        }
-        getdetails()
+        dispatch(updatechannel(channelList))
+        setChannelData(channelList);
+        setLoading(false);
   }, [user, navigate]);
 
   // Videos will be fetched based on channel
-  const [videos, setVideos] = useState([])
+  const [videos, setVideos] = useState([]);
 
   // Fetch videos when channel data is available
   useEffect(() => {
-   
-  }, [channelData?._id])
-
-  
+    async function getVids() {
+      try {
+        const res = await videoService.getAll();
+        console.log(res)
+        const vids  = res.data;
+        const filtered  =  vids.filter((vid)=> vid.channelId === id)
+        setVideos(filtered);
+        console.log(filtered)
+        setLoading(false);
+      } catch (er) {
+        console.log(er);
+      }
+    }
+    getVids();
+  }, [channelData]);
 
   if (loading) {
-    return <div className="w-full h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>;
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
-
-
 
   if (!channelData) {
     return <div>Error loading channel data</div>;
@@ -83,24 +85,26 @@ const MyChannel = ({channelList}) => {
             <h1 className="text-2xl font-bold">{channelData?.name}</h1>
             <div className="text-gray-600 text-sm space-y-1">
               <p>{channelData?.handle}</p>
-              <p>{channelData?.subscribers || 0} subscribers • {channelData?.videos || 0} videos</p>
+              <p>
+                {channelData?.subscribers || 0} subscribers •{" "}
+                {channelData?.videos || 0} videos
+              </p>
               <p className="line-clamp-2">{channelData?.description}</p>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
-  
-              <button
-                // onClick={toggleNotification}
-                className="p-2 rounded-full hover:bg-gray-100"
-              >
-                {showNotification ? (
-                  <MdNotifications className="w-6 h-6" />
-                ) : (
-                  <MdNotificationsNone className="w-6 h-6" />
-                )}
-              </button>
+            <button
+              // onClick={toggleNotification}
+              className="p-2 rounded-full hover:bg-gray-100"
+            >
+              {showNotification ? (
+                <MdNotifications className="w-6 h-6" />
+              ) : (
+                <MdNotificationsNone className="w-6 h-6" />
+              )}
+            </button>
           </div>
         </div>
 
@@ -123,23 +127,24 @@ const MyChannel = ({channelList}) => {
         </div>
 
         {/* Videos Grid */}
-        { 
-        videos >0 ?
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8">
-          
-          {videos.map((video) => (
-            <VideoCard key={video.id} video={video} />
-          ))}
-           </div>
-          :
-            <div className='w-full h-full flex justify-center items-center'>
-              <Link to={'/add-vid'} className="p-4 w-12 h-12 rounded-full border flex-center font-bold text-2xl cursor-pointer transition-transform active:scale-95 duration-300">+</Link>
-            </div>
-          }
-       
+        {videos.length !== 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8">
+            {videos.map((video) => (
+              <VideoCard key={video.id} video={video} />
+            ))}
+          </div>
+        ) : (
+          <div className="w-full h-full flex justify-center items-center">
+            <Link
+              to={"/add-vid"}
+              className="p-4 w-12 h-12 rounded-full border flex-center font-bold text-2xl cursor-pointer transition-transform active:scale-95 duration-300"
+            >
+              +
+            </Link>
+          </div>
+        )}
       </div>
     </div>
-  )
-
-}
+  );
+};
 export default MyChannel;

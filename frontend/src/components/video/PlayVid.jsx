@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AiFillDislike,
   AiFillLike,
@@ -9,10 +9,12 @@ import {
 import { FaRegBookmark } from "react-icons/fa6";
 
 const PlayVid = ({ video }) => {
+  console.log(video);
+  const [vid, setVid] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
-//   const { uploadDate, title, views } = video;
+  const { uploadDate, title, views } = video;
 
   const handleLike = async () => {
     if (disliked) setDisliked(false);
@@ -23,14 +25,17 @@ const PlayVid = ({ video }) => {
     if (isLiked) setIsLiked(false);
     setDisliked(!disliked);
   };
+
+  useEffect(() => {
+    setVid(video);
+    console.log(video);
+  }, [video]);
   return (
     <div className="w-full">
       {/* ────── Video player ────── */}
       <div className="w-full aspect-video bg-black rounded-xl overflow-hidden">
         <video
-          src={
-            "https://videos.pexels.com/video-files/32730662/13953891_2560_1440_24fps.mp4"
-          }
+          src={video.videoUrl}
           controls
           autoPlay
           className="w-full h-full"
@@ -38,7 +43,7 @@ const PlayVid = ({ video }) => {
       </div>
 
       {/* ────── Title & views ────── */}
-      <h1 className="text-lg font-semibold mt-4">{'title'}</h1>
+      <h1 className="text-lg font-semibold mt-4">{"title"}</h1>
       <p className="text-sm text-slate-600 mt-1">
         {/* {views.toLocaleString()} views • {uploadDate} */}
       </p>
@@ -48,8 +53,8 @@ const PlayVid = ({ video }) => {
         {/* ────── Channel row ────── */}
         <div className="mt-4 flex items-start gap-4">
           <img
-            src={'channelAvatar'}
-            alt={'channelName'}
+            src={"channelAvatar"}
+            alt={"channelName"}
             className="h-10 w-10 rounded-full object-cover"
           />
           <div className="flex-1">
@@ -95,7 +100,41 @@ const PlayVid = ({ video }) => {
         >
           {showMore ? "Show less" : "Show more"}
         </button>
-        <div></div>
+        <div className="border-t-2 my-12">
+          <h3 className="text-2xl font-bold my-6 ">Comments</h3>
+          <div className="flex gap-2">
+            <label className="font-bold">AddComment</label>
+            <input type="text" className="border-b basis-[80%] focus:outline-none focus:border-gray-700"/>
+          </div>
+          <div>
+           {  video.comments.length !== 0 ?
+              video.comments.map((comment)=>{
+                return(
+                  <Comment/>
+                )
+              })
+
+              :
+              <div className="w-full text-xl text-center text-gray-700 my-12">No Comments.... </div>
+           }
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Comment = () => {
+  return (
+    <div className="flex gap-6 bg-gray-200 p-2 mb-0.5 cursor-pointer">
+      <div>
+        <div className="flex-center w-10 h-10 m-2 rounded-full bg-gray-600 text-white">
+          N
+        </div>
+      </div>
+      <div>
+        <h5 className="text-xs font-bold">Channel</h5>
+        <p className="">this is a comment</p>
       </div>
     </div>
   );

@@ -1,21 +1,23 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import videoData from "../utils/data";
 import { useParams } from "react-router-dom";
-import PlayVid from "../components/video/PlayVid";
+const PlayVid = React.lazy(() => import("../components/video/PlayVid"));
 import Suggestion from "../components/video/Suggestion";
 import axios from "axios";
+import Loading from "../components/load/Loading";
 
 const Video = () => {
   const [video, setVideo] = useState(null);
-  // const vids = videoData;
   const { id } = useParams();
+  console.log(id);
   const [videos, setVideos] = useState([]);
 
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         const res = await axios.get("http://localhost:8080/api/videos");
-        setVideos(res.data);
+        const vids = res.data;
+        setVideos(vids);
       } catch (err) {
         console.log(err);
       }
@@ -24,15 +26,16 @@ const Video = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = videos.filter(vid => vid._i = id);
+    const filtered = videos.filter((vid) => vid._id == id);
+    setVideo(filtered[0]);
     console.log(filtered);
-    setVideo(filtered)
-}, [videos]); // This will run whenever videos state changes
+  }, [videos]); // This will run whenever videos state changes
 
   return (
     <div className="flex px-4 gap-4">
-      <PlayVid video={video} />
-      {/* <Suggestion/> */}
+      {!video ? <Loading /> : <PlayVid video={video} />}
+
+      <Suggestion />
     </div>
   );
 };
