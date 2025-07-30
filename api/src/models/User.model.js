@@ -4,11 +4,10 @@ const ChannelSchema = mongoose.Schema();
 
 const UserSchema = new mongoose.Schema({
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
   },
   username: {
     type: String,
-    required: true,
   },
   email: {
     type: String,

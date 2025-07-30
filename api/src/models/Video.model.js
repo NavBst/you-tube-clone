@@ -28,27 +28,38 @@ const commentSchema = new mongoose.Schema({
 
 
 const videoSchema = new mongoose.Schema({
-    videoId: {
-        type: String,
-        required: true,
-    },
-    category:{
-        type: String,
-        required: true,
-    },
     title: {
         type: String,
         required: true,
+        trim: true
+    },
+    description: {
+        type: String,
+        required: true,
+        trim: true
     },
     thumbnailUrl: {
         type: String,
         required: true,
     },
-    channelId: {
+    videoUrl: {
         type: String,
         required: true,
     },
-    uploader: {
+    duration: {
+        type: Number,
+        required: true,
+    },
+    channel: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'channel',
+        required: true
+    },
+    channelName: {
+        type: String,
+        required: true
+    },
+    category: {
         type: String,
         required: true,
     },
@@ -64,12 +75,11 @@ const videoSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    uploadDate: {
-        type: Date,
-        required: true,
-        default: () => new Date(), // returns current time when doc is created
-    },
     comments: [commentSchema],
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
 }
 )
 

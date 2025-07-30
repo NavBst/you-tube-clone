@@ -1,82 +1,87 @@
-import React, { useState } from 'react'
-import { MdCloudUpload } from 'react-icons/md'
+import React, { useEffect, useState } from "react";
+import { MdCloudUpload } from "react-icons/md";
+import { channels } from "../../utils/api";
+import { useNavigate } from "react-router-dom";
 
-const ChannelForm = () => {
+const ChannelForm = ({ onSuccess }) => {
   const [channelData, setChannelData] = useState({
-    name: '',
-    description: '',
-    handle: '',
-    avatar: null
-  })
-  const [avatarPreview, setAvatarPreview] = useState(null)
+    name: "",
+    description: "",
+    handle: "",
+    avatar: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setChannelData(prev => ({
+    const { name, value, avatar } = e.target;
+    setChannelData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setChannelData(prev => ({
-        ...prev,
-        avatar: file
-      }))
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await channels.create(channelData);
+      // Create channel with avatar URL
+      console.log(res);
+      if (res.status === 201) {
+        onSuccess && onSuccess(res.data);
       }
-      reader.readAsDataURL(file)
+      
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to create channel");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle form submission here
-    console.log(channelData)
-  }
+  useEffect(() => {
+    const getChan = async (params) => {
+      const channel = await channels.getMyChannel();
+      if(channel){
+        navigate('/channel')
+      }
+    };
+  },[]);
 
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Create Your YouTube Channel</h1>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Avatar Upload */}
-        <div className="flex flex-col items-center space-y-4">
-          <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100">
-            {avatarPreview ? (
-              <img 
-                src={avatarPreview} 
-                alt="Channel Avatar" 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <MdCloudUpload className="w-12 h-12 text-gray-400" />
-              </div>
-            )}
-          </div>
-          <input
-            type="file"
-            id="avatar"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            className="hidden"
-          />
+        {/* Avatar Name */}
+        <div>
           <label
             htmlFor="avatar"
-            className="py-2 px-4 bg-blue-600 text-white rounded-full cursor-pointer hover:bg-blue-700 transition-colors"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Upload Channel Picture
+            Avatar Link
           </label>
+          <input
+            type="text"
+            id="avatar"
+            name="avatar"
+            value={channelData.avatar}
+            onChange={handleInputChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your channel avatar link"
+            required
+          />
         </div>
 
-        {/* Channel Name */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Channel name
           </label>
           <input
@@ -93,7 +98,10 @@ const ChannelForm = () => {
 
         {/* Channel Handle */}
         <div>
-          <label htmlFor="handle" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="handle"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Channel handle
           </label>
           <div className="flex items-center">
@@ -113,7 +121,10 @@ const ChannelForm = () => {
 
         {/* Channel Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Description
           </label>
           <textarea
@@ -127,16 +138,22 @@ const ChannelForm = () => {
           />
         </div>
 
+        {/* Error Message */}
+        {error && <div className="text-red-500 text-sm">{error}</div>}
+
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          disabled={loading}
+          className={`w-full py-3 bg-blue-600 text-white font-medium rounded-lg transition-colors ${
+            loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+          }`}
         >
-          Create Channel
+          {loading ? "Creating Channel..." : "Create Channel"}
         </button>
       </form>
     </div>
-  )
-}
+  );
+};
 
 export default ChannelForm;

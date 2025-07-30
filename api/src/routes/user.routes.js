@@ -1,8 +1,10 @@
+import express from "express";
 import { login, register } from "../controllers/user.controller.js";
 import { userAuthentication, userRegAuth } from "../middlewares/authUser.js";
 
-export function userRoute(app, route) {
-  route.post("/register", userRegAuth, register);
-  route.post("/login", userAuthentication, login);
-  app.use("/api/user", route);
-}
+const router = express.Router();
+
+router.post("/register", userRegAuth, register);
+router.post("/login", userAuthentication, login);
+
+export default router;

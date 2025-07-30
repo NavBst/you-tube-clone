@@ -1,9 +1,10 @@
 import bcrypt from "bcrypt";
 import User from "../models/User.model.js";
+import jwt  from "jsonwebtoken";
 
 export const userRegAuth = async (req, res, next) => {
   try {
-    const { email, password, username } = req.body;
+    const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (user) {
@@ -23,6 +24,7 @@ export const userRegAuth = async (req, res, next) => {
 export const userAuthentication = async (req, res, next) => {
   try {
     let { email, password } = req.body;
+    console.log(email);
     const data = await User.findOne({ email });
     if (!data) {
       res.status(404).json({ message: "user not registered!" });
@@ -43,17 +45,18 @@ export const userAuthentication = async (req, res, next) => {
 export const verifyToken = (req, res, next) => {
   if (
     req.headers &&
-    req.headers.Authorization &&
-    req.headers.Authorization.splite(" ")[0] === "JWT"
+    req.headers.authorization &&
+    req.headers.authorization.split(" ")[0] === 'Bearer'
   ) {
     jwt.verify(
-      req.headers.Authorization.split(" ")[1],
-      "hidden",
+      req.headers.authorization.split(" ")[1].trim(),
+      process.env.JWT_SECRET,
       (er, verifiedToken) => {
         if (er) {
           return res.status(403).json({ message: "Invalid Token" });
         } else {
-          console.log(verifiedToken);
+          req.user = verifiedToken;
+          console.log(req.user)
           next();
         }
       }

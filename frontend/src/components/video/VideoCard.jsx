@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const VideoCard = ({ video }) => {
   return (
-    <Link to={`/video/${video.id}`}>
+    <Link to={`/video/${video._id}`}>
       <div className="w-full  shadow-lg rounded-lg cursor-pointer">
         <img
           src={video.thumbnail}
@@ -24,7 +24,7 @@ const VideoCard = ({ video }) => {
               </button>
             </div>
             <div className="text-xs py-2">
-              <h3 className="">{video.channelName}</h3>
+              <h3 className="">"video channelName"</h3>
               <p className="">{video.views  } views &middot; 5 days ago</p>
             </div>
           </div>

@@ -1,24 +1,56 @@
-import express, { json } from "express";
+import express from "express";
 import mongoose from "mongoose";
-import { videoRoutes } from "./src/routes/Video.routes.js";
-import { userRoute } from "./src/routes/user.routes.js";
 import cors from "cors";
 import dotenv from "dotenv";
-import { commentRoutes } from "./src/routes/comment.routes.js";
+import videoRoutes from "./src/routes/Video.routes.js";
+import userRoutes from "./src/routes/user.routes.js";
+import commentRoutes from "./src/routes/comment.routes.js";
+import channelRoutes from "./src/routes/channel.routes.js";
+import { handleError } from "./src/utils/error.js";
 
 const app = express();
-const router = express.Router();
 dotenv.config();
-mongoose.connect(process.env.DB_CONNECTION).then(() => {
-  console.log("DB connected Succesfull! ");
-});
+
+// Connect to MongoDB with error handling
+mongoose.connect(process.env.DB_CONNECTION)
+.then(() => console.log("DB connected Successfully!"))
+.catch(err => console.error("DB Connection Error:", err));
+
+// Global Middlewares
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:8080', // Your frontend URL
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'], // Important!
+    exposedHeaders: ['Authorization']
+}));
 
-videoRoutes(app, router);
-userRoute(app, router);
-commentRoutes(app, router);
+// Error handling for JSON parsing
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ message: "Invalid JSON payload" });
+  }
+  next();
+});
 
-app.listen(process.env.PORT, (resolve, reject) => {
-  console.log(`running in port ${process.env.PORT}`);
+// API Routes
+app.use('/api/videos', videoRoutes);
+app.use('/api/channels', channelRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/user', userRoutes);
+
+// Error Handling Middleware
+app.use(handleError);
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found"
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
